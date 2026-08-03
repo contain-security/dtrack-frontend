@@ -170,7 +170,7 @@ export default {
           title: this.$t('message.component'),
           field: 'component.name',
           sortable: true,
-          formatter: (value, row, index) => {
+          formatter: (value, row) => {
             let url = xssFilters.uriInUnQuotedAttr(
               '../../../components/' + row.component.uuid,
             );
@@ -190,7 +190,7 @@ export default {
           title: this.$t('message.version'),
           field: 'component.version',
           sortable: true,
-          formatter(value, row, index) {
+          formatter(value, row) {
             if (row.component.latestVersion) {
               if (
                 compareVersions(
@@ -232,7 +232,7 @@ export default {
           title: this.$t('message.group'),
           field: 'component.group',
           sortable: true,
-          formatter(value, row, index) {
+          formatter(value) {
             return xssFilters.inHTMLData(common.valueWithDefault(value, ''));
           },
         },
@@ -240,7 +240,7 @@ export default {
           title: this.$t('message.vulnerability'),
           field: 'vulnerability.vulnId',
           sortable: true,
-          formatter(value, row, index) {
+          formatter(value, row) {
             let url = xssFilters.uriInUnQuotedAttr(
               '../../../vulnerabilities/' +
                 row.vulnerability.source +
@@ -257,7 +257,7 @@ export default {
           title: this.$t('message.aliases'),
           field: 'vulnerability.aliases',
           visible: false,
-          formatter(value, row, index) {
+          formatter(value, row) {
             if (typeof value !== 'undefined') {
               let label = '';
               const aliases = common.resolveVulnAliases(
@@ -288,7 +288,7 @@ export default {
           field: 'vulnerability.cwes',
           sortable: true,
           visible: false,
-          formatter(value, row, index) {
+          formatter(value) {
             if (typeof value !== 'undefined') {
               let label = '';
               for (let i = 0; i < value.length; i++) {
@@ -307,7 +307,7 @@ export default {
           field: 'vulnerability.severity',
           sortName: 'vulnerability.severity',
           sortable: true,
-          formatter(value, row, index) {
+          formatter(value) {
             if (typeof value !== 'undefined') {
               return common.formatSeverityLabel(value);
             }
@@ -349,7 +349,7 @@ export default {
           title: this.$t('message.analyzer'),
           field: 'attribution.analyzerIdentity',
           sortable: true,
-          formatter(value, row, index) {
+          formatter(value, row) {
             return common.formatAnalyzerLabel(
               row.attribution.analyzerIdentity,
               row.vulnerability.source,
@@ -363,7 +363,7 @@ export default {
           title: this.$t('message.attributed_on'),
           field: 'attribution.attributedOn',
           sortable: true,
-          formatter(value, row, index) {
+          formatter(value) {
             return xssFilters.inHTMLData(common.formatTimestamp(value));
           },
         },
@@ -378,7 +378,7 @@ export default {
           field: 'analysis.isSuppressed',
           sortable: true,
           class: 'tight',
-          formatter(value, row, index) {
+          formatter(value) {
             return value === true ? '<i class="fa fa-check-square-o" />' : '';
           },
         },
@@ -527,9 +527,9 @@ export default {
           }
         });
     },
-    reAnalyze: function (data) {
+    reAnalyze: function () {
       let analyzeUrl = `${this.$api.BASE_URL}/${this.$api.URL_FINDING}/project/${this.uuid}/analyze`;
-      this.axios.post(analyzeUrl).then((response) => {
+      this.axios.post(analyzeUrl).then(() => {
         this.$toastr.s(this.$t('message.project_reanalyze_requested'));
         //ignore token from response, don't wait for completion
         this.refreshTable();
