@@ -44,19 +44,42 @@
             <span class="fa fa-download"></span>
             {{ $t('message.download_bom') }}
           </template>
-          <b-dropdown-item @click="downloadBom('inventory')" href="#">{{
-            $t('message.inventory')
-          }}</b-dropdown-item>
-          <b-dropdown-item
-            @click="downloadBom('withVulnerabilities')"
+          <b-dropdown-group :header="$t('message.inventory')">
+            <b-dropdown-item
+              v-for="version in specVersions"
+              :key="'inventory-' + version"
+              @click="downloadBom('inventory', version)"
+              href="#"
+              >{{
+                $t('message.cyclonedx_version', { version })
+              }}</b-dropdown-item
+            >
+          </b-dropdown-group>
+          <b-dropdown-divider
             v-permission:or="[
               PERMISSIONS.VIEW_VULNERABILITY,
               PERMISSIONS.VULNERABILITY_ANALYSIS,
               PERMISSIONS.VULNERABILITY_ANALYSIS_READ,
             ]"
-            href="#"
-            >{{ $t('message.inventory_with_vulnerabilities') }}</b-dropdown-item
+          />
+          <b-dropdown-group
+            :header="$t('message.inventory_with_vulnerabilities')"
+            v-permission:or="[
+              PERMISSIONS.VIEW_VULNERABILITY,
+              PERMISSIONS.VULNERABILITY_ANALYSIS,
+              PERMISSIONS.VULNERABILITY_ANALYSIS_READ,
+            ]"
           >
+            <b-dropdown-item
+              v-for="version in specVersions"
+              :key="'with-vulnerabilities-' + version"
+              @click="downloadBom('withVulnerabilities', version)"
+              href="#"
+              >{{
+                $t('message.cyclonedx_version', { version })
+              }}</b-dropdown-item
+            >
+          </b-dropdown-group>
         </b-dropdown>
         <b-dropdown
           variant="outline-primary"
@@ -129,7 +152,11 @@
 </template>
 
 <script>
-import { compareVersions } from '@/shared/utils';
+import {
+  compareVersions,
+  CYCLONEDX_SPEC_VERSIONS,
+  downloadBlob,
+} from '@/shared/utils';
 import ComponentOccurrenceListModal from '@/views/portfolio/projects/ComponentOccurrenceListModal.vue';
 import ProjectAddComponentModal from '@/views/portfolio/projects/ProjectAddComponentModal';
 import ProjectUploadBomModal from '@/views/portfolio/projects/ProjectUploadBomModal';
@@ -218,6 +245,7 @@ export default {
       },
       onlyOutdated: false,
       onlyDirect: false,
+      specVersions: CYCLONEDX_SPEC_VERSIONS,
       searchText: null,
       visibleColumns: initialVisibleColumns,
       columns: this.buildColumns(),
@@ -547,7 +575,7 @@ export default {
         ? this.$refs.table.$refs.table
         : null;
     },
-    downloadBom(data) {
+    downloadBom(variant, version) {
       const url = `${this.$api.BASE_URL}/${this.$api.URL_BOM}/cyclonedx/project/${this.uuid}`;
       this.axios
         .request({
@@ -556,28 +584,20 @@ export default {
           method: 'get',
           params: {
             format: 'json',
-            variant: data,
+            variant,
+            version,
             download: 'true',
           },
         })
-        .then((response) => {
-          const objectUrl = window.URL.createObjectURL(
-            new Blob([response.data]),
-          );
-          const link = document.createElement('a');
-          link.href = objectUrl;
-          let filename = 'bom.json';
-          const disposition = response.headers['content-disposition'];
-          if (disposition && disposition.indexOf('attachment') !== -1) {
-            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-            const matches = filenameRegex.exec(disposition);
-            if (matches != null && matches[1]) {
-              filename = matches[1].replace(/['"]/g, '');
-            }
+        .then((response) => downloadBlob(response, 'bom.json'))
+        .catch((error) => {
+          if (error.response && error.response.status === 400) {
+            this.$toastr.e(
+              this.$t('message.cyclonedx_version_not_supported', { version }),
+            );
+          } else {
+            this.$toastr.e(this.$t('condition.unsuccessful_action'));
           }
-          link.setAttribute('download', filename);
-          document.body.appendChild(link);
-          link.click();
         });
     },
     buildTableFile(items, fileType) {

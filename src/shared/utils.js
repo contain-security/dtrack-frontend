@@ -5,6 +5,35 @@ import flexVerCompare from 'flexver/dist/module';
 import Vue from 'vue';
 import xssFilters from 'xss-filters';
 
+export const CYCLONEDX_SPEC_VERSIONS = ['1.7', '1.6', '1.5'];
+
+/**
+ * Triggers a browser download for an axios blob response.
+ *
+ * @param {object} response axios response containing the downloaded blob
+ * @param {string} fallbackFilename filename to use when no server filename exists
+ */
+export function downloadBlob(response, fallbackFilename) {
+  const objectUrl = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = objectUrl;
+
+  let filename = fallbackFilename;
+  const disposition = response.headers['content-disposition'];
+  if (disposition && disposition.indexOf('attachment') !== -1) {
+    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+    if (matches != null && matches[1]) {
+      filename = matches[1].replace(/['"]/g, '');
+    }
+  }
+
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(objectUrl);
+}
+
 export function handleTableLoadError(problem, { fallback = true } = {}) {
   if (
     problem &&

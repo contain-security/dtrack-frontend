@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "Общее описание слабостей (CWE)",
     "cwe_id": "ID CWE",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "Панель управления",
     "data": "Данные",
     "dates": "Даты",

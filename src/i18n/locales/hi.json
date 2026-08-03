@@ -573,6 +573,8 @@
     "cwe": "सीडब्ल्यूई",
     "cwe_full": "सामान्य कमज़ोरी गणना (CWE)",
     "cwe_id": "सीडब्ल्यूई आईडी",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "डैशबोर्ड",
     "data": "डेटा",
     "dates": "खजूर",

@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "Gemeinsame Schwachstellenaufzählung (CWE)",
     "cwe_id": "CWE-ID",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "Dashboard",
     "data": "Daten",
     "dates": "Termine",

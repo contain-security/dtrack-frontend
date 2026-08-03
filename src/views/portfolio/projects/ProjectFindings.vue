@@ -21,36 +21,50 @@
         $t('message.apply_vex_tooltip')
       }}</b-tooltip>
 
-      <b-button
+      <b-dropdown
         id="export-vex-button"
-        size="md"
         variant="outline-primary"
-        @click="downloadVex()"
         v-permission:or="[
           PERMISSIONS.VIEW_VULNERABILITY,
           PERMISSIONS.VULNERABILITY_ANALYSIS,
           PERMISSIONS.VULNERABILITY_ANALYSIS_READ,
         ]"
       >
-        <span class="fa fa-download"></span> {{ $t('message.export_vex') }}
-      </b-button>
+        <template #button-content>
+          <span class="fa fa-download"></span> {{ $t('message.export_vex') }}
+        </template>
+        <b-dropdown-item
+          v-for="version in specVersions"
+          :key="'vex-' + version"
+          @click="downloadVex(version)"
+          href="#"
+          >{{ $t('message.cyclonedx_version', { version }) }}</b-dropdown-item
+        >
+      </b-dropdown>
       <b-tooltip target="export-vex-button" triggers="hover focus">{{
         $t('message.export_vex_tooltip')
       }}</b-tooltip>
 
-      <b-button
+      <b-dropdown
         id="export-vdr-button"
-        size="md"
         variant="outline-primary"
-        @click="downloadVdr()"
         v-permission:or="[
           PERMISSIONS.VIEW_VULNERABILITY,
           PERMISSIONS.VULNERABILITY_ANALYSIS,
           PERMISSIONS.VULNERABILITY_ANALYSIS_READ,
         ]"
       >
-        <span class="fa fa-download"></span> {{ $t('message.export_vdr') }}
-      </b-button>
+        <template #button-content>
+          <span class="fa fa-download"></span> {{ $t('message.export_vdr') }}
+        </template>
+        <b-dropdown-item
+          v-for="version in specVersions"
+          :key="'vdr-' + version"
+          @click="downloadVdr(version)"
+          href="#"
+          >{{ $t('message.cyclonedx_version', { version }) }}</b-dropdown-item
+        >
+      </b-dropdown>
       <b-tooltip target="export-vdr-button" triggers="hover focus">{{
         $t('message.export_vdr_tooltip')
       }}</b-tooltip>
@@ -69,15 +83,6 @@
         $t('message.project_reanalyze_tooltip')
       }}</b-tooltip>
 
-      <!-- Future use when CSAF support is added
-      <b-dropdown variant="outline-primary" v-permission:or="[PERMISSIONS.VIEW_VULNERABILITY, PERMISSIONS.VULNERABILITY_ANALYSIS]">
-        <template #button-content>
-          <span class="fa fa-download"></span> {{ $t('message.export_vex') }}
-        </template>
-        <b-dropdown-item @click="downloadVex('cyclonedx')" href="#">CycloneDX</b-dropdown-item>
-        <b-dropdown-item @click="downloadVex('csaf')" href="#">CSAF</b-dropdown-item>
-      </b-dropdown>
-      -->
       <c-switch
         style="margin-left: 1rem; margin-right: 0.5rem"
         id="showSuppressedFindings"
@@ -112,6 +117,8 @@ import common from '@/shared/common';
 import i18n from '@/i18n';
 import {
   compareVersions,
+  CYCLONEDX_SPEC_VERSIONS,
+  downloadBlob,
   loadUserPreferencesForBootstrapTable,
 } from '@/shared/utils';
 import bootstrapTableMixin from '@/mixins/bootstrapTableMixin';
@@ -153,6 +160,7 @@ export default {
   data() {
     return {
       showSuppressedFindings: this.showSuppressedFindings,
+      specVersions: CYCLONEDX_SPEC_VERSIONS,
       labelIcon: {
         dataOn: '\u2713',
         dataOff: '\u2715',
@@ -471,7 +479,7 @@ export default {
       }
       return url;
     },
-    downloadVex: function () {
+    downloadVex: function (version) {
       let url = `${this.$api.BASE_URL}/${this.$api.URL_VEX}/cyclonedx/project/${this.uuid}`;
       this.axios
         .request({
@@ -479,28 +487,22 @@ export default {
           url: url,
           method: 'get',
           params: {
+            version,
             download: 'true',
           },
         })
-        .then((response) => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          let filename = 'vex.json';
-          let disposition = response.headers['content-disposition'];
-          if (disposition && disposition.indexOf('attachment') !== -1) {
-            let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-            let matches = filenameRegex.exec(disposition);
-            if (matches != null && matches[1]) {
-              filename = matches[1].replace(/['"]/g, '');
-            }
+        .then((response) => downloadBlob(response, 'vex.json'))
+        .catch((error) => {
+          if (error.response && error.response.status === 400) {
+            this.$toastr.e(
+              this.$t('message.cyclonedx_version_not_supported', { version }),
+            );
+          } else {
+            this.$toastr.e(this.$t('condition.unsuccessful_action'));
           }
-          link.setAttribute('download', filename);
-          document.body.appendChild(link);
-          link.click();
         });
     },
-    downloadVdr: function () {
+    downloadVdr: function (version) {
       let url = `${this.$api.BASE_URL}/${this.$api.URL_BOM}/cyclonedx/project/${this.uuid}`;
       this.axios
         .request({
@@ -510,25 +512,19 @@ export default {
           params: {
             format: 'json',
             variant: 'vdr',
+            version,
             download: 'true',
           },
         })
-        .then((response) => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          let filename = 'bom.json';
-          let disposition = response.headers['content-disposition'];
-          if (disposition && disposition.indexOf('attachment') !== -1) {
-            let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-            let matches = filenameRegex.exec(disposition);
-            if (matches != null && matches[1]) {
-              filename = matches[1].replace(/['"]/g, '');
-            }
+        .then((response) => downloadBlob(response, 'bom.json'))
+        .catch((error) => {
+          if (error.response && error.response.status === 400) {
+            this.$toastr.e(
+              this.$t('message.cyclonedx_version_not_supported', { version }),
+            );
+          } else {
+            this.$toastr.e(this.$t('condition.unsuccessful_action'));
           }
-          link.setAttribute('download', filename);
-          document.body.appendChild(link);
-          link.click();
         });
     },
     reAnalyze: function (data) {

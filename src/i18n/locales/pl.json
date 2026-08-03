@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "Wyliczenie typowych słabych stron (CWE)",
     "cwe_id": "Identyfikator CWE",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "Panel",
     "data": "Dane",
     "dates": "Daktyle",

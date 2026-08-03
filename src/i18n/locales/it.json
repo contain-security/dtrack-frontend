@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "Enumerazione delle debolezze comuni (CWE)",
     "cwe_id": "ID CWE",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "Pannello di controllo",
     "data": "Dati",
     "dates": "Date",

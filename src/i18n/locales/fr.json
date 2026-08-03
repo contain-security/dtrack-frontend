@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "Common Weakness Enumeration (CWE)",
     "cwe_id": "Identifiant CWE",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "Tableau de bord",
     "data": "Données",
     "dates": "Dates",

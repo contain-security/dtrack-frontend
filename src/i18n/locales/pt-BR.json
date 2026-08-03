@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "Enumeração de fraquezas comuns (CWE)",
     "cwe_id": "ID do CWE",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "Painel",
     "data": "Dados",
     "dates": "datas",

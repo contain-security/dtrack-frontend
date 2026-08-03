@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "CWE 全称",
     "cwe_id": "CWE ID",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "仪表板",
     "data": "数据",
     "dates": "日期",

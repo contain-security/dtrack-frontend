@@ -574,6 +574,8 @@
     "cwe": "CWE",
     "cwe_full": "Common Weakness Enumeration (CWE)",
     "cwe_id": "CWE ID",
+    "cyclonedx_version": "CycloneDX {version}",
+    "cyclonedx_version_not_supported": "The server does not support CycloneDX {version}. It may need to be upgraded.",
     "dashboard": "Dashboard",
     "data": "Data",
     "dates": "Dates",

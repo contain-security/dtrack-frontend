@@ -573,6 +573,8 @@
     "cwe": "CWE",
     "cwe_full": "共通脆弱性一覧 (CWE)",
     "cwe_id": "CWEID",
+    "cyclonedx_version": null,
+    "cyclonedx_version_not_supported": null,
     "dashboard": "ダッシュボード",
     "data": "データ",
     "dates": "日付",
